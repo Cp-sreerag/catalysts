@@ -1,0 +1,9 @@
+# ===================== requirements.txt =======================
+fastapi
+uvicorn[standard]
+yfinance
+pandas
+numpy
+scikit-learn
+tensorflow
+python-multipart   # if you later add file upload endpoints

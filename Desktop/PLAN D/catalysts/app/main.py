@@ -1,0 +1,28 @@
+# ===================== app/main.py ============================
+from fastapi import FastAPI, HTTPException, Depends
+from pydantic import BaseModel
+from .data import get_price_history
+from .model import predict_next_close
+import pandas as pd
+
+app = FastAPI(title="Stock Predictor API", version="0.1.0")
+
+class PredictionResponse(BaseModel):
+    symbol: str
+    last_close: float
+    predicted_next_close: float
+    trend: str  # "up" | "down"
+
+
+@app.get("/predict", response_model=PredictionResponse)
+async def predict(symbol: str = "AAPL"):
+    try:
+        df = get_price_history(symbol)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    last_close = float(df['Close'].iloc[-1])
+    pred = predict_next_close(df)
+    trend = "up" if pred > last_close else "down"
+
+    return PredictionResponse(symbol=symbol, last_close=last_close, predicted_next_close=pred, trend=trend)
